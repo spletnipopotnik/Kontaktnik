@@ -13,5 +13,6 @@ namespace Kontaktnik.Dtos
         
        [Range(10000000,99999999)]
         public int TaxNumber { get; set; }
+        public IEnumerable<CustomerContactsDto>? ContactDetails { get; set; }
     }
 }

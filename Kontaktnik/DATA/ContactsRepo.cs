@@ -12,17 +12,22 @@ namespace Kontaktnik.DATA
         {
             _context = context;
         }
-        public  void CreateCustomerContact(ContactDetail contactdetails)
-        {
-            throw new NotImplementedException();
-        }
-
+       
+        // vpiše v bazo  nov tip kontaktnih podatkov
         public async Task<ContactType> CreateNewContactType(ContactType contacttype)
         {           
            var result = await _context.ContactTypes.AddAsync(contacttype);
             return result.Entity;
         }
-        //ustvari vse parametre za filtriranje po kontaktnih podatkih
+
+        // vpiše v bazo  nov  kontaktni podatk stranke
+        public async Task<ContactDetail> CreateNewCustomerContact(ContactDetail contactdetails)
+        {
+            var result = await _context.Contacts.AddAsync(contactdetails);
+            return result.Entity;
+        }
+
+        //ustvari in vrne vse parametre za filtriranje po kontaktnih podatkih
         public async Task<IEnumerable<string>> GetFilterContacts()
         {
             List<string> firstcontacts = new List<string> { "Vse", "Ime", "Priimek", "Davčna številka" };
@@ -33,6 +38,7 @@ namespace Kontaktnik.DATA
             return allcontacts;
         }
 
+        //vrne seznam tipov kontaktnih podatkov
         public async Task<IEnumerable<ContactTypeReadDto>> GetAllContactTypes()
         {
             var allcontacts = await _context.ContactTypes
@@ -44,6 +50,7 @@ namespace Kontaktnik.DATA
                 .ToListAsync();
             return allcontacts;
         }
+
         // vrne vse kontaktne podatke ( tip in vrednost) za stranko z določenim id-jem
         public async Task<IEnumerable<CustomerContactsDto>> GetAllCustomerContacts(Guid id)
         {
@@ -52,6 +59,7 @@ namespace Kontaktnik.DATA
                 .Where(x => x.CustomerId == id)
                 .Select(x => new CustomerContactsDto
                 {
+                    ContactTypeId = x.ContactTypeId,
                     ContactTypeName = x.ContactType.ContactTypeName,
                     ContactValue = x.DataValue
                 })
@@ -62,20 +70,14 @@ namespace Kontaktnik.DATA
         public async Task<ContactType> GetContactTypeById(int id)
         {
             var contact = await _context.ContactTypes.SingleOrDefaultAsync(x => x.Id == id);
-            return contact;
-          
-        }
-
-        
-
-        public Task<IEnumerable<ContactType>> GetSearchContacts()
-        {
-            throw new NotImplementedException();
-        }
+            return contact;          
+        }        
 
         public async Task<bool> SaveChanges()
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
+
+       
     }
 }

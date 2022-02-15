@@ -36,7 +36,7 @@ namespace Kontaktnik.Controllers
            
         }
         //api/customers/{id} - Izpis stranke glede na njegov {id}
-        [HttpGet("{id}", Name = "GetCustomerById")]
+        [HttpGet("{id:Guid}", Name = "GetCustomerById")]
         public async Task<ActionResult<CustomerDetailsDto>> GetCustomerById(Guid id)
         {
             try
@@ -84,7 +84,8 @@ namespace Kontaktnik.Controllers
                     ModelState.AddModelError("taxNumber", "Davčna številka že obstaja.");
                     return BadRequest(ModelState);
                 }
-
+                 
+                //doda novo stranko
                 var newCustomer = new Customer
                 {
                     Id = Guid.NewGuid(),
@@ -93,9 +94,26 @@ namespace Kontaktnik.Controllers
                     TaxNumber = customer.TaxNumber
                 };
                 await _customerrepo.CreateCustomer(newCustomer);
-                await _customerrepo.SaveChanges();
+                
 
-                return CreatedAtRoute(nameof(GetCustomerById), new { Id = newCustomer.Id }, newCustomer);
+                //doda njegove kontaktne podatke, če so bili vnešeni zraven prvega vpisa
+                if (customer.ContactDetails != null)
+                {
+                    foreach (CustomerContactsDto dto in customer.ContactDetails)
+                    {
+                        var newContact = new ContactDetail
+                        {
+                            DataValue = dto.ContactValue,
+                            CustomerId = newCustomer.Id,
+                            ContactTypeId = dto.ContactTypeId
+                        };
+                        await _contactsrepo.CreateNewCustomerContact(newContact);
+                    }
+                }
+
+                await _contactsrepo.SaveChanges();
+
+                return CreatedAtRoute(nameof(GetCustomerById), new { Id = newCustomer.Id }, customer);
             }
             catch (Exception)
             {

@@ -58,6 +58,6 @@ namespace Kontaktnik.DATA
             return result.Entity;
         }
 
-       
+      
     }
 }

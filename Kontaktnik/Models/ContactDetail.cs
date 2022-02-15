@@ -9,7 +9,7 @@ namespace Kontaktnik.Models
         [Required]
         public string DataValue { get; set; }
 
-        public Guid DataTypeId { get; set; }
+        public int ContactTypeId { get; set; }
         public ContactType ContactType { get; set; }
 
         public Guid CustomerId { get; set; }

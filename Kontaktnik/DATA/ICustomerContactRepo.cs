@@ -11,5 +11,6 @@ namespace Kontaktnik.DATA
         Task<Customer> GetCustomerById (Guid id);
         Task<Customer> GetCustomerByTax (int tax);
         Task<Customer> CreateCustomer (Customer customer);
+      
     }
 }
