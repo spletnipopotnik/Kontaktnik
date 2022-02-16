@@ -7,7 +7,7 @@ namespace Kontaktnik.DATA
     {
         Task<bool> SaveChanges();
         Task<IEnumerable<ContactTypeReadDto>> GetAllContactTypes();
-        Task<IEnumerable<string>> GetFilterContacts();
+        Task<IEnumerable<ContactTypeReadDto>> GetFilterContacts();
         Task<IEnumerable<CustomerContactsDto>> GetAllCustomerContacts(Guid id);
         Task<ContactType> GetContactTypeById(int id);
         Task<ContactDetail> CreateNewCustomerContact(ContactDetail contactdetails);

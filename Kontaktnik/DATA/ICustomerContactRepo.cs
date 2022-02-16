@@ -8,6 +8,7 @@ namespace Kontaktnik.DATA
     {
         Task<bool> SaveChanges();
         Task<IEnumerable<CustomerReadDto>> GetAllCustomers();
+        Task<IEnumerable<CustomerReadDto>> GetFilteredCustomers(FilterItem filter);
         Task<Customer> GetCustomerById (Guid id);
         Task<Customer> GetCustomerByTax (int tax);
         Task<Customer> CreateCustomer (Customer customer);

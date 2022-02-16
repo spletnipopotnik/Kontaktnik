@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Kontaktnik.DATA;
 using Kontaktnik.Dtos;
 using Kontaktnik.Models;
@@ -9,7 +10,7 @@ namespace Kontaktnik.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class CustomersController : ControllerBase
-    {        
+    {
         private readonly ICustomerContactRepo _customerrepo;
         private readonly IContactsRepo _contactsrepo;
 
@@ -18,14 +19,18 @@ namespace Kontaktnik.Controllers
             _customerrepo = customerrepo;
             _contactsrepo = contactsrepo;
         }
+
+       
+
         //api/customers -izpis vseh strank
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CustomerReadDto>>> GetAllCustomers()
         {
             try
             {
-                var allCustomers = await _customerrepo.GetAllCustomers();
                
+                var allCustomers = await _customerrepo.GetAllCustomers();
+                
                 return Ok(allCustomers);
             }
             catch (Exception)
@@ -34,6 +39,36 @@ namespace Kontaktnik.Controllers
                                          "Error retrieving data from the database");
             }
            
+        }
+        [HttpGet("{filter}")]
+        public async Task<ActionResult<IEnumerable<CustomerReadDto>>> GetFilteredCustomers(string filter)
+        {
+             try
+             {
+                
+                if (filter != null)     
+                 {
+                    FilterItem filterData = new FilterItem();   
+                    try
+                    {
+                        filterData = JsonSerializer.Deserialize<FilterItem>(filter);
+                    }
+                    catch(Exception)
+                    {
+                        return StatusCode(StatusCodes.Status400BadRequest);
+                    }
+                    var allCustomers = await _customerrepo.GetFilteredCustomers(filterData);
+
+                 return Ok(allCustomers);
+                }
+                return StatusCode(StatusCodes.Status204NoContent);
+            }
+             catch (Exception)
+             {
+                 return StatusCode(StatusCodes.Status500InternalServerError,
+                                          "Error retrieving data from the database");
+             }
+            return Ok();
         }
         //api/customers/{id} - Izpis stranke glede na njegov {id}
         [HttpGet("{id:Guid}", Name = "GetCustomerById")]
@@ -68,7 +103,7 @@ namespace Kontaktnik.Controllers
             }
         }
         // Vstvari novo stranko
-        [HttpPost]
+       /* [HttpPost]
         public async Task <ActionResult<CustomerReadDto>> CreateCustomer(CustomerCreateDto customer)
         {
             try
@@ -120,6 +155,6 @@ namespace Kontaktnik.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,
                                          "Error retrieving data from the database");
             }
-        }   
+        }   */
     }
 }

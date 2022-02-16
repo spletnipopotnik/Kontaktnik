@@ -27,14 +27,23 @@ namespace Kontaktnik.DATA
             return result.Entity;
         }
 
-        //ustvari in vrne vse parametre za filtriranje po kontaktnih podatkih
-        public async Task<IEnumerable<string>> GetFilterContacts()
+        //ustvari in vrne vse parametre za filtriranje po vseh kontaktnih podatkih tudi ime, priimek in davčna številka
+        public async Task<IEnumerable<ContactTypeReadDto>> GetFilterContacts()
         {
-            List<string> firstcontacts = new List<string> { "Vse", "Ime", "Priimek", "Davčna številka" };
-            var contacts = await _context.ContactTypes
-                .Select(c => c.ContactTypeName)
-                .ToListAsync();
-            var allcontacts = firstcontacts.Concat(contacts).ToList(); // 
+            var firstcontacts = new List<ContactType>
+            {  
+              new ContactType  {Id = 0, ContactTypeName = "Ime"},
+              new ContactType  {Id = 0, ContactTypeName = "Priimek"},
+              new ContactType  {Id = 0, ContactTypeName = "Davčna številka"}
+            };
+            var contacts = await _context.ContactTypes.ToListAsync();
+            var allcontacts = firstcontacts.Concat(contacts)
+                .Select(c => new ContactTypeReadDto
+                {
+                    Id = c.Id,
+                    ContactTypeName = c.ContactTypeName
+                })
+                .ToList(); 
             return allcontacts;
         }
 

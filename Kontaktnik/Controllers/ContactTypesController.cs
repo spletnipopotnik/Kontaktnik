@@ -20,7 +20,7 @@ namespace Kontaktnik.Controllers
         //api/contacttypes/filter  - izpiše vse možnosti filtriranja strank
 
         [HttpGet("{filter}")]
-        public async Task<ActionResult<IEnumerable<string>>> FilterContacts()
+        public async Task<ActionResult<IEnumerable<ContactTypeReadDto>>> FilterContacts()
         {
             try
             {
