@@ -11,5 +11,6 @@ namespace Kontaktnik.DATA
         public DbSet<Customer> Customers { get; set; }
         public DbSet<ContactType> ContactTypes { get; set; }
         public DbSet<ContactDetail> Contacts { get; set; }
+        public DbSet<CustomerFile> CustomerFiles { get; set; }
     }
 }

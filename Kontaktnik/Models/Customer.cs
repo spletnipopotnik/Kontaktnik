@@ -16,6 +16,7 @@ namespace Kontaktnik.Models
         public int TaxNumber { get; set; }
 
      
-        public IEnumerable<ContactDetail> ContactDetails { get; set; } 
+        public IEnumerable<ContactDetail> ContactDetails { get; set; }
+        public IEnumerable<CustomerFile> CustomerFiles { get; set; }
     }
 }
