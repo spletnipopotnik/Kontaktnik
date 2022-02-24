@@ -7,10 +7,12 @@ namespace Kontaktnik.DATA
     public class CustomerContactRepo : ICustomerContactRepo
     {
         private KontaktnikDbContext _context;
+        private IContactsRepo _contactsrepo;
 
-        public CustomerContactRepo(KontaktnikDbContext context)
+        public CustomerContactRepo(KontaktnikDbContext context, IContactsRepo contactsrepo)
         {
             _context = context;
+            _contactsrepo = contactsrepo;
         }
 
         
@@ -30,17 +32,27 @@ namespace Kontaktnik.DATA
             return customer;
         }
         // vrne saznam vseh strank
-        public async Task<IEnumerable<CustomerReadDto>> GetAllCustomers()
+        public async Task<IEnumerable<CustomerDetailsDto>> GetAllCustomers()
         {
-           var allcustomers = await _context.Customers.Select(x => new CustomerReadDto
-             {
+           var allcustomers =  _context.Customers.Select( x => new CustomerDetailsDto
+           {
                  Id = x.Id,
                  LastName = x.LastName,
                  FirstName = x.FirstName,
-                 TaxNumber = x.TaxNumber
-             }).ToListAsync();  
+                 TaxNumber = x.TaxNumber,
+                 ContactDetails =  _context.Contacts
+                                        .Include(y => y.ContactType)
+                                        .Where(y => y.CustomerId == x.Id)
+                                        .Select(y => new CustomerContactsDto
+                                        {
+                                            ContactTypeId = y.ContactTypeId,
+                                            ContactTypeName = y.ContactType.ContactTypeName,
+                                            ContactValue = y.DataValue
+                                        })
+                                        .ToList()
+             });  
            
-            return allcustomers;
+            return await allcustomers.ToListAsync();
         }
        
         public async Task<IEnumerable<CustomerReadDto>> GetFilteredCustomers(FilterItem filter)
@@ -129,12 +141,84 @@ namespace Kontaktnik.DATA
         // nova stranka
         public async Task<Customer> CreateCustomer(Customer customer)
         {
-            if(customer == null)
-            {
-                throw new ArgumentNullException(nameof(customer));
-            }
+            
             var result = await _context.Customers.AddAsync(customer);
             return result.Entity;
+        }
+        public async Task<Customer> UpdateCustomer(Customer updatedCustomer, List<CustomerContactsDto> updatedContacts)
+        {
+            var customer = await _context.Customers.FindAsync(updatedCustomer.Id);
+            var neki = await GetCustomerById(updatedCustomer.Id);
+            if (customer != null)
+            {
+                customer.FirstName = updatedCustomer.FirstName;
+                customer.LastName = updatedCustomer.LastName;
+                customer.TaxNumber = updatedCustomer.TaxNumber;
+                // Če seznam ni prazen  posodobi vnešene podatke
+                if (updatedContacts != null)
+                {
+                    //naredi seznam starih kontaktov
+                    var oldContacts = await _context.Contacts.Where(x => x.CustomerId == updatedCustomer.Id).ToListAsync();
+                    foreach (ContactDetail oldContact in oldContacts)
+                    {
+                        var contactToUpdate = updatedContacts.FirstOrDefault(x => x.ContactTypeId == oldContact.ContactTypeId);
+                        var contact = await _context.Contacts.SingleOrDefaultAsync(x => x.Id == oldContact.Id);
+
+                        // če tip starega kontakta obstaja med novimi ga posodobi, drugače ga izbriše
+                        if (contactToUpdate != null)
+                        {
+                            contact.DataValue = contactToUpdate.ContactValue;
+                            updatedContacts.Remove(contactToUpdate); //iz novih kontaktov izbriše tistega, ki ga je že dodal
+                        }
+                        else
+                        {
+                            _context.Contacts.Remove(contact);
+                        }
+    ;
+                    }
+                    //doda vse nove kontakte
+                    foreach (CustomerContactsDto newUpdateContact in updatedContacts)
+                    {
+                        // če tip id tipa kontakta nedefiniran  pomeni, da še ne obstaja zato ustvari novega
+                        int typeId = newUpdateContact.ContactTypeId;
+                        if (newUpdateContact.ContactTypeId == null)
+                        {
+                            var newType = new ContactType
+                            {
+                                ContactTypeName = newUpdateContact.ContactTypeName
+                            };
+                            await _context.ContactTypes.AddAsync(newType);
+                            await _context.SaveChangesAsync();
+                            typeId = newType.Id;
+                        }
+                        var newContact = new ContactDetail
+                        {
+                            DataValue = newUpdateContact.ContactValue,
+                            CustomerId = updatedCustomer.Id,
+                            ContactTypeId = typeId
+
+                        };
+                        _context.Contacts.Add(newContact);
+                    }
+                }
+            }
+            return updatedCustomer;
+        }
+        // izbris stranke
+        public async Task<bool> DeleteCustomer(Guid id)
+        {
+            try
+            {
+                var customerToDelete = await _context.Customers.SingleOrDefaultAsync(x => x.Id == id);
+                _context.Customers.Remove(customerToDelete);
+                return true;
+            }
+           catch (Exception)
+            {
+
+            }
+            return false;
+           
         }
 
        

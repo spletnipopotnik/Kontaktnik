@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddDbContext<KontaktnikDbContext>(o => o.UseSqlServer("name=ConnectionStrings:KontaktnikConnection"));
 builder.Services.AddControllers();
-    //.AddJsonOptions(x =>x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+//.AddJsonOptions(x =>x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddScoped<ICustomerContactRepo, CustomerContactRepo>();
 builder.Services.AddScoped<IContactsRepo, ContactsRepo>();

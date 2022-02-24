@@ -1,12 +1,14 @@
 ﻿using Kontaktnik.DATA;
 using Kontaktnik.Dtos;
 using Kontaktnik.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kontaktnik.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+ 
     public class ContactTypesController : ControllerBase
     {
         private readonly ICustomerContactRepo _customerrepo;
