@@ -13,23 +13,7 @@ namespace Kontaktnik.DATA.FileManager
             _context = context;
          
         }       
-        public bool RemoveCustomerFile(string filedelete)
-        {
-            try
-            {
-                var file = Path.Combine(_imagePath, filedelete);
-                if (File.Exists(file))
-                {
-                    File.Delete(file);                   
-                }
-                return true;
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return false;
-            }
-        }
+      
         public async Task<CustomerFile> SaveFile(CustomerFile file)
         {
             var result = await _context.CustomerFiles.AddAsync(file);                        
@@ -46,9 +30,35 @@ namespace Kontaktnik.DATA.FileManager
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<CustomerFileReadDto>> GetAllCustomerFileNames(Guid id)
+        public async Task<IEnumerable<CustomerFileReadDto>> GetAllCustomerFileNames(Guid id)
         {
-            throw new NotImplementedException();
+            var  allfiles = _context.CustomerFiles
+                .Where(x => x.CustomerId == id)
+                .Select(x => new CustomerFileReadDto
+                {
+                    CustomerId = x.CustomerId,
+                    FileName = x.FileName,
+                    FileDescription = x.FileDescription,
+                    FileType = x.FileType,
+                    FileId = x.FileId
+                }).ToList();
+            return allfiles;
+
+        }
+
+        public  bool DeleteFileById(int id)
+        {
+            try
+            {
+                var fileToDelete =  _context.CustomerFiles.SingleOrDefault(x => x.FileId == id);
+                _context.CustomerFiles.Remove(fileToDelete);
+                return true;
+            }
+            catch (Exception)
+            {
+
+            }
+            return false;
         }
     }
 }

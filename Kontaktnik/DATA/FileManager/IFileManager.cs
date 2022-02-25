@@ -9,7 +9,9 @@ namespace Kontaktnik.DATA.FileManager
         Task<CustomerFile> SaveFile(CustomerFile file);
         Task<CustomerFileReadDto> GetCustomerFileDescriptionById(int fid);
         Task<IEnumerable<CustomerFileReadDto>> GetAllCustomerFileNames(Guid id);
+        bool DeleteFileById(int id);
 
-        bool RemoveCustomerFile(string filedelete);
+
+
     }
 }
